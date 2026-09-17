@@ -1,9 +1,14 @@
 import javax.swing.*;
 import java.awt.*;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.Optional;
 
 public class Main extends JFrame {
+    public static LocalDateTime start;
+    public static LocalDateTime end;
+
 
     public Main() {
         setLocationRelativeTo(null);
@@ -17,17 +22,30 @@ public class Main extends JFrame {
         trackBtn.addActionListener(e -> {
             trackBtn.setEnabled(false);
 
-            Optional<ProcessHandle> process = ProcessHandle.allProcesses()
-                    .filter(ph -> ph.info().command().toString().contains("FrostyModManager.exe"))
-                    .findFirst();
+            ProcessHandle process = null;
 
-            ProcessHandle p = process.get();
+            while (process == null) {
 
-            if (p.isAlive()) {
+                System.out.println("searching");
+                process = ProcessHandle.allProcesses()
+                        .filter(ph -> ph.info().command().toString().contains("FrostyModManager.exe"))
+                        .findFirst()
+                        .orElse(null);
+            }
+
+            start = LocalDateTime.now();
+
+            System.out.println(process.pid());
+
+            if (process.isAlive()) {
                 System.out.println("here");
-                p.onExit().thenAccept(pp -> {
-                    System.out.println(LocalDateTime.now());
+                process.onExit().thenAccept(pp -> {
+                    end = LocalDateTime.now();
+                    System.out.println(end);
                     trackBtn.setEnabled(true);
+
+                    long seconds = Duration.between(start, end).getSeconds();
+                    System.out.println(seconds);
                 });
             }
         });
