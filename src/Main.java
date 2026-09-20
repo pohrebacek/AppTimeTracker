@@ -4,10 +4,16 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.Optional;
+import java.util.concurrent.*;
 
 public class Main extends JFrame {
     public static LocalDateTime start;
     public static LocalDateTime end;
+    static JButton trackBtn;
+    static JButton stopTrackBtn;
+    static Future<?> runningTask;
+
+    public static ExecutorService startCountExecutor = Executors.newSingleThreadExecutor();
 
 
     public Main() {
@@ -17,47 +23,65 @@ public class Main extends JFrame {
 
         setLayout(new BorderLayout());
 
-        JButton trackBtn = new JButton("track");
+        trackBtn = new JButton("track");
+
 
         trackBtn.addActionListener(e -> {
-            trackBtn.setEnabled(false);
+            start = null;
+            end = null;
+            runningTask = startCountExecutor.submit(() -> {
+                trackBtn.setEnabled(false);
+                stopTrackBtn.setEnabled(true);
+                ProcessHandle process = null;
 
-            ProcessHandle process = null;
+                while (process == null && !Thread.currentThread().isInterrupted()) {
+                    System.out.println("searching");
+                    process = ProcessHandle.allProcesses()
+                            .filter(ph -> ph.info().command().toString().contains("FrostyModManager.exe"))
+                            .findFirst()
+                            .orElse(null);
+                }
 
-            while (process == null) {
+                start = LocalDateTime.now();
 
-                System.out.println("searching");
-                process = ProcessHandle.allProcesses()
-                        .filter(ph -> ph.info().command().toString().contains("FrostyModManager.exe"))
-                        .findFirst()
-                        .orElse(null);
+                if (process != null && process.isAlive()) {
+                    System.out.println(process.pid());
+                    System.out.println("here");
+                    process.onExit().thenAccept(pp -> {
+                        end = LocalDateTime.now();
+                        System.out.println(end);
+                        trackBtn.setEnabled(true);
+                        stopTrackBtn.setEnabled(false);
+                        long seconds = Duration.between(start, end).getSeconds();
+                        System.out.println(seconds);
+                    });
+                }
+
+            });
+        });
+
+        stopTrackBtn = new JButton("Stop tracking");
+        stopTrackBtn.setEnabled(false);
+        stopTrackBtn.addActionListener(e -> {
+            if (runningTask != null) {
+                runningTask.cancel(true);
             }
 
-            start = LocalDateTime.now();
+            stopTrackBtn.setEnabled(false);
+            trackBtn.setEnabled(true);
 
-            System.out.println(process.pid());
-
-            if (process.isAlive()) {
-                System.out.println("here");
-                process.onExit().thenAccept(pp -> {
-                    end = LocalDateTime.now();
-                    System.out.println(end);
-                    trackBtn.setEnabled(true);
-
-                    long seconds = Duration.between(start, end).getSeconds();
-                    System.out.println(seconds);
-                });
+            if (start != null) {
+                end = LocalDateTime.now();
+                long seconds = Duration.between(start, end).getSeconds();
+                System.out.println(seconds);
             }
         });
 
         add(trackBtn, BorderLayout.CENTER);
+        add(stopTrackBtn, BorderLayout.EAST);
     }
 
     public static void main(String[] args) {
         new Main().setVisible(true);
-    }
-
-    public void test() {
-
     }
 }
