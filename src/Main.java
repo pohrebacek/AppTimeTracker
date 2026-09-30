@@ -3,6 +3,7 @@ import java.awt.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.*;
 
@@ -12,6 +13,7 @@ public class Main extends JFrame {
     static JButton trackBtn;
     static JButton stopTrackBtn;
     static Future<?> runningTask;
+    static ArrayList<App> apps = new ArrayList<>();
 
     public static ExecutorService startCountExecutor = Executors.newSingleThreadExecutor();
 
@@ -29,10 +31,7 @@ public class Main extends JFrame {
 
         JButton addGame = new JButton("Add Game");
         addGame.addActionListener(e -> {
-            int r = chooser.showOpenDialog(null);
-            if (r == JFileChooser.APPROVE_OPTION) {
-                System.out.printf(chooser.getSelectedFile().getName());
-            }
+            new AppForm().setVisible(true);
         });
         northPanel.add(addGame);
 

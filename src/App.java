@@ -1,12 +1,12 @@
 public class App {
     private String title;
     private String file;
-    private long seconds;
+    private double hours;
 
-    public App(String title, String file, long seconds) {
+    public App(String title, String file, double hours) {
         this.title = title;
         this.file = file;
-        this.seconds = seconds;
+        this.hours = hours;
     }
 
     public String getTitle() {
@@ -17,7 +17,7 @@ public class App {
         return this.file;
     }
 
-    public long getSeconds() {
-        return this.seconds;
+    public double getHours() {
+        return this.hours;
     }
 }
