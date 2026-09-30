@@ -23,6 +23,20 @@ public class Main extends JFrame {
 
         setLayout(new BorderLayout());
 
+        JPanel northPanel = new JPanel();
+        northPanel.setLayout(new FlowLayout());
+        JFileChooser chooser = new JFileChooser();
+
+        JButton addGame = new JButton("Add Game");
+        addGame.addActionListener(e -> {
+            int r = chooser.showOpenDialog(null);
+            if (r == JFileChooser.APPROVE_OPTION) {
+                System.out.printf(chooser.getSelectedFile().getName());
+            }
+        });
+        northPanel.add(addGame);
+
+
         trackBtn = new JButton("track");
 
 
@@ -79,6 +93,7 @@ public class Main extends JFrame {
 
         add(trackBtn, BorderLayout.CENTER);
         add(stopTrackBtn, BorderLayout.EAST);
+        add(northPanel, BorderLayout.NORTH);
     }
 
     public static void main(String[] args) {
