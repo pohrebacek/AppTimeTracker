@@ -10,8 +10,7 @@ import java.util.concurrent.*;
 public class Main extends JFrame {
     public static LocalDateTime start;
     public static LocalDateTime end;
-    static JButton trackBtn;
-    static JButton stopTrackBtn;
+    static JPanel centerPanel;
     static Future<?> runningTask;
     static ArrayList<App> apps = new ArrayList<>();
 
@@ -35,67 +34,107 @@ public class Main extends JFrame {
         });
         northPanel.add(addGame);
 
+        centerPanel = new JPanel();
+        centerPanel.setLayout(new FlowLayout());
+        centerPanel.setBackground(Color.red);
 
-        trackBtn = new JButton("track");
 
 
-        trackBtn.addActionListener(e -> {
-            start = null;
-            end = null;
-            runningTask = startCountExecutor.submit(() -> {
-                trackBtn.setEnabled(false);
-                stopTrackBtn.setEnabled(true);
-                ProcessHandle process = null;
+        add(centerPanel, BorderLayout.CENTER);
 
-                while (process == null && !Thread.currentThread().isInterrupted()) {
-                    System.out.println("searching");
-                    process = ProcessHandle.allProcesses()
-                            .filter(ph -> ph.info().command().toString().contains("FrostyModManager.exe"))
-                            .findFirst()
-                            .orElse(null);
-                }
-
-                start = LocalDateTime.now();
-
-                if (process != null && process.isAlive()) {
-                    System.out.println(process.pid());
-                    System.out.println("here");
-                    process.onExit().thenAccept(pp -> {
-                        end = LocalDateTime.now();
-                        System.out.println(end);
-                        trackBtn.setEnabled(true);
-                        stopTrackBtn.setEnabled(false);
-                        long seconds = Duration.between(start, end).getSeconds();
-                        System.out.println(seconds);
-                    });
-                }
-
-            });
-        });
-
-        stopTrackBtn = new JButton("Stop tracking");
-        stopTrackBtn.setEnabled(false);
-        stopTrackBtn.addActionListener(e -> {
-            if (runningTask != null) {
-                runningTask.cancel(true);
-            }
-
-            stopTrackBtn.setEnabled(false);
-            trackBtn.setEnabled(true);
-
-            if (start != null) {
-                end = LocalDateTime.now();
-                long seconds = Duration.between(start, end).getSeconds();
-                System.out.println(seconds);
-            }
-        });
-
-        add(trackBtn, BorderLayout.CENTER);
-        add(stopTrackBtn, BorderLayout.EAST);
         add(northPanel, BorderLayout.NORTH);
     }
 
     public static void main(String[] args) {
         new Main().setVisible(true);
+    }
+
+    public static void renderApps() {
+        centerPanel.setLayout(new GridLayout(apps.size(), 1));
+        centerPanel.removeAll();
+        for (int i = 0; i < apps.size(); i++) {
+            String appFile = apps.get(i).getFile();
+            JPanel appPanel = new JPanel();
+            appPanel.setLayout(new FlowLayout());
+            JPanel appInfoPanel = new JPanel();
+            appInfoPanel.setLayout(new GridLayout(3, 1));
+            JLabel appTitle = new JLabel(apps.get(i).getTitle());
+            JLabel appHours = new JLabel(String.valueOf(apps.get(i).getHours()) + " hours played");
+            JLabel trackStatus = new JLabel("Not tracking");
+            appInfoPanel.add(appTitle);
+            appInfoPanel.add(appHours);
+            appInfoPanel.add(trackStatus);
+            appPanel.add(appInfoPanel);
+
+            JButton trackBtn = new JButton("Track");
+            JButton stopTrackBtn = new JButton("Stop Track");
+            trackBtn.addActionListener(e -> {
+                start = null;
+                end = null;
+                runningTask = startCountExecutor.submit(() -> {
+                    trackBtn.setEnabled(false);
+                    stopTrackBtn.setEnabled(true);
+                    ProcessHandle process = null;
+
+                    while (process == null && !Thread.currentThread().isInterrupted()) {
+                        //System.out.println("searching");
+                        trackStatus.setText("Searching");
+                        process = ProcessHandle.allProcesses()
+                                .filter(ph -> ph.info().command().toString().contains(appFile))
+                                .findFirst()
+                                .orElse(null);
+                    }
+
+                    start = LocalDateTime.now();
+
+                    if (process != null && process.isAlive()) {
+                        System.out.println(process.pid());
+                        //System.out.println("here");
+                        trackStatus.setText("Tracking");
+                        process.onExit().thenAccept(pp -> {
+                            end = LocalDateTime.now();
+                            System.out.println(end);
+                            trackBtn.setEnabled(true);
+                            stopTrackBtn.setEnabled(false);
+                            long seconds = Duration.between(start, end).getSeconds();
+                            System.out.println(seconds);
+                            trackStatus.setText("Not tracking");
+                        });
+                    }
+
+                });
+            });
+
+            stopTrackBtn.setEnabled(false);
+            stopTrackBtn.addActionListener(e -> {
+                if (runningTask != null) {
+                    runningTask.cancel(true);
+                }
+
+                stopTrackBtn.setEnabled(false);
+                trackBtn.setEnabled(true);
+
+                if (start != null) {
+                    end = LocalDateTime.now();
+                    long seconds = Duration.between(start, end).getSeconds();
+                    System.out.println(seconds);
+                }
+
+                trackStatus.setText("Not tracking");
+            });
+
+            JButton editBtn = new JButton("Edit");
+            JButton deleteBtn = new JButton("Delete");
+
+            appPanel.add(trackBtn);
+            appPanel.add(stopTrackBtn);
+            appPanel.add(editBtn);
+            appPanel.add(deleteBtn);
+
+            centerPanel.add(appPanel);
+        }
+
+        centerPanel.revalidate();
+        centerPanel.repaint();
     }
 }

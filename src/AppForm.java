@@ -80,6 +80,7 @@ public class AppForm extends JFrame {
                 System.out.println("gut");
                 App app = new App(nameTf.getText(), chooser.getSelectedFile().getName(), hours);
                 Main.apps.add(app);
+                Main.renderApps();
                 dispose();
             }
         });
