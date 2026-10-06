@@ -1,8 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -59,6 +57,13 @@ public class Main extends JFrame {
             bw.newLine();
         }
         bw.close();
+    }
+
+    public static void loadApps(String file) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        while ((line = br.readLine()) != null) {
+
+        }
     }
 
     public static void renderApps() {
