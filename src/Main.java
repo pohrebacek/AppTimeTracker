@@ -79,14 +79,16 @@ public class Main extends JFrame {
         centerPanel.setLayout(new GridLayout(apps.size(), 1));
         centerPanel.removeAll();
         for (int i = 0; i < apps.size(); i++) {
-            String appFile = apps.get(i).getFile();
+            App currentApp = apps.get(i);
+            String appFile = currentApp.getFile();
             JPanel appPanel = new JPanel();
             appPanel.setLayout(new FlowLayout());
             JPanel appInfoPanel = new JPanel();
             appInfoPanel.setLayout(new GridLayout(3, 1));
-            JLabel appTitle = new JLabel(apps.get(i).getTitle());
-            JLabel appHours = new JLabel(String.valueOf(apps.get(i).getHours()) + " hours played");
+            JLabel appTitle = new JLabel(currentApp.getTitle());
+            JLabel appHours = new JLabel(String.valueOf(currentApp.getHours()) + " hours played");
             JLabel trackStatus = new JLabel("Not tracking");
+            trackStatus.setForeground(Color.red);
             appInfoPanel.add(appTitle);
             appInfoPanel.add(appHours);
             appInfoPanel.add(trackStatus);
@@ -109,6 +111,7 @@ public class Main extends JFrame {
                     while (process == null && !Thread.currentThread().isInterrupted()) {
                         //System.out.println("searching");
                         trackStatus.setText("Searching");
+                        trackStatus.setForeground(Color.blue);
                         process = ProcessHandle.allProcesses()
                                 .filter(ph -> ph.info().command().toString().contains(appFile))
                                 .findFirst()
@@ -121,6 +124,7 @@ public class Main extends JFrame {
                         System.out.println(process.pid());
                         //System.out.println("here");
                         trackStatus.setText("Tracking");
+                        trackStatus.setForeground(Color.green);
                         process.onExit().thenAccept(pp -> {
                             end = LocalDateTime.now();
                             System.out.println(end);
@@ -130,7 +134,20 @@ public class Main extends JFrame {
                             stopTrackBtn.setEnabled(false);
                             long seconds = Duration.between(start, end).getSeconds();
                             System.out.println(seconds);
+                            System.out.println(seconds / 3600);
+                            double oldHours = currentApp.getHours();
+                            double newHours = oldHours + (double) (seconds / 3600);
+                            appHours.setText(newHours + " hours played");
+                            apps.remove(currentApp);
+                            currentApp.setHours(newHours);
+                            apps.add(currentApp);
+                            try {
+                                writeApps();
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex);
+                            }
                             trackStatus.setText("Not tracking");
+                            trackStatus.setForeground(Color.red);
                         });
                     }
 
@@ -152,9 +169,22 @@ public class Main extends JFrame {
                     end = LocalDateTime.now();
                     long seconds = Duration.between(start, end).getSeconds();
                     System.out.println(seconds);
+                    System.out.println(seconds / 3600);
+                    double oldHours = currentApp.getHours();
+                    double newHours = oldHours + (double) (seconds / 3600);
+                    appHours.setText(newHours + " hours played");
+                    apps.remove(currentApp);
+                    currentApp.setHours(newHours);
+                    apps.add(currentApp);
+                    try {
+                        writeApps();
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
 
                 trackStatus.setText("Not tracking");
+                trackStatus.setForeground(Color.red);
             });
 
             appPanel.add(trackBtn);

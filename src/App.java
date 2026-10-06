@@ -21,6 +21,18 @@ public class App {
         return this.hours;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setFile(String file) {
+        this.file = file;
+    }
+
+    public void setHours(double hours) {
+        this.hours = hours;
+    }
+
     public String toString() {
         return this.title + ";" + this.file + ";" + this.hours;
     }
