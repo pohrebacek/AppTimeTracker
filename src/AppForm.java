@@ -1,6 +1,7 @@
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.io.IOException;
 
 public class AppForm extends JFrame {
     public AppForm() {
@@ -80,6 +81,11 @@ public class AppForm extends JFrame {
                 System.out.println("gut");
                 App app = new App(nameTf.getText(), chooser.getSelectedFile().getName(), hours);
                 Main.apps.add(app);
+                try {
+                    Main.writeApps();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
                 Main.renderApps();
                 dispose();
             }

@@ -1,5 +1,8 @@
 import javax.swing.*;
 import java.awt.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -47,6 +50,15 @@ public class Main extends JFrame {
 
     public static void main(String[] args) {
         new Main().setVisible(true);
+    }
+
+    public static void writeApps() throws IOException {
+        BufferedWriter bw = new BufferedWriter(new FileWriter("apps.txt"), 4096);    //size (SZ) = velikost bufferu
+        for (int i = 0; i < apps.size()-1; i++) {
+            bw.write(apps.get(i).toString());
+            bw.newLine();
+        }
+        bw.close();
     }
 
     public static void renderApps() {

@@ -20,4 +20,8 @@ public class App {
     public double getHours() {
         return this.hours;
     }
+
+    public String toString() {
+        return this.title + ";" + this.file + ";" + this.hours;
+    }
 }
