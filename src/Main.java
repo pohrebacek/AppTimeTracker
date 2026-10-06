@@ -39,31 +39,41 @@ public class Main extends JFrame {
         centerPanel.setLayout(new FlowLayout());
         centerPanel.setBackground(Color.red);
 
-
+        renderApps();
 
         add(centerPanel, BorderLayout.CENTER);
 
         add(northPanel, BorderLayout.NORTH);
     }
 
-    public static void main(String[] args) {
-        new Main().setVisible(true);
-    }
-
     public static void writeApps() throws IOException {
         BufferedWriter bw = new BufferedWriter(new FileWriter("apps.txt"), 4096);    //size (SZ) = velikost bufferu
-        for (int i = 0; i < apps.size()-1; i++) {
+        for (int i = 0; i < apps.size(); i++) {
+            System.out.println(apps.get(i).toString());
             bw.write(apps.get(i).toString());
             bw.newLine();
         }
         bw.close();
     }
 
-    public static void loadApps(String file) throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        while ((line = br.readLine()) != null) {
-
+    public static void loadApps(String file) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String line;
+            App app;
+            while ((line = br.readLine()) != null) {
+                app = new App(
+                        line.split(";")[0],
+                        line.split(";")[1],
+                        Double.parseDouble(line.split(";")[2])
+                );
+                apps.add(app);
+            }
+            br.close();
+        } catch (IOException e) {
+            System.out.println("File not found.");
         }
+
     }
 
     public static void renderApps() {
@@ -85,11 +95,15 @@ public class Main extends JFrame {
 
             JButton trackBtn = new JButton("Track");
             JButton stopTrackBtn = new JButton("Stop Track");
+            JButton editBtn = new JButton("Edit");
+            JButton deleteBtn = new JButton("Delete");
             trackBtn.addActionListener(e -> {
                 start = null;
                 end = null;
                 runningTask = startCountExecutor.submit(() -> {
                     trackBtn.setEnabled(false);
+                    editBtn.setEnabled(false);
+                    deleteBtn.setEnabled(false);
                     stopTrackBtn.setEnabled(true);
                     ProcessHandle process = null;
 
@@ -112,6 +126,8 @@ public class Main extends JFrame {
                             end = LocalDateTime.now();
                             System.out.println(end);
                             trackBtn.setEnabled(true);
+                            editBtn.setEnabled(true);
+                            deleteBtn.setEnabled(true);
                             stopTrackBtn.setEnabled(false);
                             long seconds = Duration.between(start, end).getSeconds();
                             System.out.println(seconds);
@@ -129,6 +145,8 @@ public class Main extends JFrame {
                 }
 
                 stopTrackBtn.setEnabled(false);
+                editBtn.setEnabled(true);
+                deleteBtn.setEnabled(true);
                 trackBtn.setEnabled(true);
 
                 if (start != null) {
@@ -140,9 +158,6 @@ public class Main extends JFrame {
                 trackStatus.setText("Not tracking");
             });
 
-            JButton editBtn = new JButton("Edit");
-            JButton deleteBtn = new JButton("Delete");
-
             appPanel.add(trackBtn);
             appPanel.add(stopTrackBtn);
             appPanel.add(editBtn);
@@ -153,5 +168,10 @@ public class Main extends JFrame {
 
         centerPanel.revalidate();
         centerPanel.repaint();
+    }
+
+    public static void main(String[] args) {
+        loadApps("apps.txt");
+        new Main().setVisible(true);
     }
 }
