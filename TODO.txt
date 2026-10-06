@@ -1,0 +1,6 @@
+- BUG: když dma track u jedný appky, pak u druhý a zrušim u první tak nic pak nefunguje
+- lepší UI
+    - rozvržení
+    - barevně odlišený "searching" "tracking" atd...
+- edit button
+- delete button

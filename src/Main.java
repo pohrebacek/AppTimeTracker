@@ -37,7 +37,6 @@ public class Main extends JFrame {
 
         centerPanel = new JPanel();
         centerPanel.setLayout(new FlowLayout());
-        centerPanel.setBackground(Color.red);
 
         renderApps();
 
