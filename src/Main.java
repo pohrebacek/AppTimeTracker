@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.*;
 
@@ -75,6 +76,17 @@ public class Main extends JFrame {
 
     }
 
+    public static double calculateHours(App currentApp) {
+        long seconds = Duration.between(start, end).getSeconds();
+        System.out.println(seconds);
+        double secondsParsed = (double) seconds;
+        double hours = secondsParsed / 3600;
+        double oldHours = currentApp.getHours();
+        double newHours = oldHours + hours;
+        String formated = String.format(Locale.US, "%.1f", newHours);
+        return Double.parseDouble(formated);
+    }
+
     public static void renderApps() {
         centerPanel.setLayout(new GridLayout(apps.size(), 1));
         centerPanel.removeAll();
@@ -132,11 +144,7 @@ public class Main extends JFrame {
                             editBtn.setEnabled(true);
                             deleteBtn.setEnabled(true);
                             stopTrackBtn.setEnabled(false);
-                            long seconds = Duration.between(start, end).getSeconds();
-                            System.out.println(seconds);
-                            System.out.println(seconds / 3600);
-                            double oldHours = currentApp.getHours();
-                            double newHours = oldHours + (double) (seconds / 3600);
+                            double newHours = calculateHours(currentApp);
                             appHours.setText(newHours + " hours played");
                             apps.remove(currentApp);
                             currentApp.setHours(newHours);
@@ -167,11 +175,7 @@ public class Main extends JFrame {
 
                 if (start != null) {
                     end = LocalDateTime.now();
-                    long seconds = Duration.between(start, end).getSeconds();
-                    System.out.println(seconds);
-                    System.out.println(seconds / 3600);
-                    double oldHours = currentApp.getHours();
-                    double newHours = oldHours + (double) (seconds / 3600);
+                    double newHours = calculateHours(currentApp);
                     appHours.setText(newHours + " hours played");
                     apps.remove(currentApp);
                     currentApp.setHours(newHours);
